@@ -59,13 +59,13 @@
 - [x] Loading/error/empty states everywhere (SPEC F4)
 - [x] Commit
 
-## Phase 4 — Infra (~1h) · Owner: Kimi
+## Phase 4 — Infra (~1h) · Owner: Kimi (executed by Qwen session)
 
-- [ ] `backend/Dockerfile` (multi-stage, non-root user) + `frontend/Dockerfile`
-- [ ] `docker-compose.yml` — add backend + frontend services, healthchecks, depends_on
-- [ ] `infra/terraform/` — VPC, ECS Fargate service + ALB, RDS Postgres, Secrets Manager (OpenAI key) w/ rotation Lambda, IAM least-privilege. `terraform validate` + `plan` clean (no apply)
-- [ ] `.env.example` finalized (all vars documented)
-- [ ] Commit
+- [x] `backend/Dockerfile` (multi-stage, non-root user) + `frontend/Dockerfile`
+- [x] `docker-compose.yml` — add backend + frontend services, healthchecks, depends_on
+- [x] `infra/terraform/` — VPC, ECS Fargate service + ALB, RDS Postgres, Secrets Manager (OpenAI key) w/ rotation Lambda, IAM least-privilege. `terraform validate` + `plan` clean (no apply)
+- [x] `.env.example` finalized (all vars documented)
+- [x] Commit
 
 ## Phase 5 — README + evals (~1h) · Owner: Qwen
 
