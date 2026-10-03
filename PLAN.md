@@ -47,17 +47,17 @@
 - [x] Integration test: ingest fixture doc → query → expect citation of correct chunk (mock embeddings)
 - [x] Commit
 
-## Phase 3 — Frontend (~2h) · Owner: Kimi
+## Phase 3 — Frontend (~2h) · Owner: Kimi (executed by Qwen session)
 
-- [ ] Router + 2 pages: `/` (Upload & Documents), `/chat` (Assistant)
-- [ ] Auth: simple login/register form, JWT in memory + refresh-safe storage, protected routes
-- [ ] Upload page: drag&drop/file form, upload progress, documents list w/ status, empty state
-- [ ] Chat page: question input, SSE streaming render ("thinking" → tokens → done), error state w/ retry
-- [ ] Citations UI: source chunks w/ scores, expandable
-- [ ] Refine/re-ask buttons on each answer (SPEC F6)
-- [ ] Low-confidence banner (SPEC F7)
-- [ ] Loading/error/empty states everywhere (SPEC F4)
-- [ ] Commit
+- [x] Router + 2 pages: `/` (Upload & Documents), `/chat` (Assistant)
+- [x] Auth: simple login/register form, JWT in memory + refresh-safe storage, protected routes
+- [x] Upload page: drag&drop/file form, upload progress, documents list w/ status, empty state
+- [x] Chat page: question input, SSE streaming render ("thinking" → tokens → done), error state w/ retry
+- [x] Citations UI: source chunks w/ scores, expandable
+- [x] Refine/re-ask buttons on each answer (SPEC F6)
+- [x] Low-confidence banner (SPEC F7)
+- [x] Loading/error/empty states everywhere (SPEC F4)
+- [x] Commit
 
 ## Phase 4 — Infra (~1h) · Owner: Kimi
 
