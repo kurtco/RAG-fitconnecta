@@ -29,7 +29,7 @@ export function createChatRouter(deps: ChatRouterDeps): Router {
       const conversation = await resolveConversation(deps, conversationId, userId, question);
       const history = await loadHistory(deps, conversation.id);
 
-      const output = await runChat({ question, history }, deps.pipeline);
+      const output = await runChat({ question, history, ownerId: userId }, deps.pipeline);
 
       await deps.messages.create({ conversationId: conversation.id, role: "user", content: question });
       await deps.messages.create({
@@ -76,7 +76,7 @@ export function createChatRouter(deps: ChatRouterDeps): Router {
       });
 
       let finalEvent: Extract<ChatStreamEvent, { type: "done" }> | undefined;
-      for await (const event of runChatStream({ question, history }, deps.pipeline)) {
+      for await (const event of runChatStream({ question, history, ownerId: userId }, deps.pipeline)) {
         if (aborted) break;
         if (event.type === "done") {
           finalEvent = event;

@@ -7,7 +7,9 @@ import type {
   AiMetadata,
   ChatHistoryEntry,
   Conversation,
+  DocumentRecord,
   Message,
+  RetrievedChunk,
   User,
 } from "./types.js";
 
@@ -68,6 +70,44 @@ export interface MessageRepository {
     ai?: Omit<AiMetadata, "retrievedChunkIds"> & { retrievedChunkIds?: string[] };
   }): Promise<Message>;
   listByConversation(conversationId: string, limit?: number): Promise<Message[]>;
+}
+
+// ---------- Embeddings ----------
+
+export interface EmbeddingProvider {
+  readonly name: string;
+  readonly dimensions: number;
+  embed(texts: string[]): Promise<number[][]>;
+}
+
+// ---------- Documents & chunks ----------
+
+export interface DocumentRepository {
+  create(input: {
+    ownerId: string;
+    filename: string;
+    mimeType: string;
+    sizeBytes: number;
+    sha256: string;
+  }): Promise<DocumentRecord>;
+  findByIdForOwner(id: string, ownerId: string): Promise<DocumentRecord | null>;
+  listForOwner(ownerId: string): Promise<DocumentRecord[]>;
+  markProcessing(id: string): Promise<void>;
+  markReady(id: string, stats: { charCount: number; chunkCount: number }): Promise<void>;
+  markFailed(id: string, errorDetail: string): Promise<void>;
+}
+
+export interface ChunkInsert {
+  documentId: string;
+  chunkIndex: number;
+  content: string;
+  tokenEst: number;
+  embedding: number[];
+}
+
+export interface ChunkRepository {
+  insertMany(chunks: ChunkInsert[]): Promise<void>;
+  searchSimilar(ownerId: string, queryEmbedding: number[], topK: number): Promise<RetrievedChunk[]>;
 }
 
 // ---------- Chat pipeline (orchestrates the 3 stages) ----------

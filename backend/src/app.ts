@@ -10,8 +10,13 @@ import { createApiRateLimiter, createLlmRateLimiter } from "./middleware/rate-li
 import { createPool } from "./infra/db.js";
 import { PgUserRepository } from "./infra/pg-user-repo.js";
 import { PgConversationRepository, PgMessageRepository } from "./infra/pg-repos.js";
+import { PgDocumentRepository } from "./infra/pg-document-repo.js";
+import { PgChunkRepository } from "./infra/pg-chunk-repo.js";
+import { createEmbeddingProvider } from "./rag/embed.js";
+import { retrieveChunks } from "./rag/retrieve.js";
 import { createAuthRouter } from "./api/routes/auth.js";
 import { createChatRouter } from "./api/routes/chat.js";
+import { createDocumentsRouter } from "./api/routes/documents.js";
 
 export interface AppDeps {
   pool?: ReturnType<typeof createPool>;
@@ -32,6 +37,14 @@ export function createApp(config: AppConfig, deps: AppDeps = {}): Express {
   const users = new PgUserRepository(pool);
   const conversations = new PgConversationRepository(pool);
   const messages = new PgMessageRepository(pool);
+  const documents = new PgDocumentRepository(pool);
+  const chunks = new PgChunkRepository(pool);
+
+  const embeddings = createEmbeddingProvider({
+    provider: config.LLM_PROVIDER,
+    openaiApiKey: config.OPENAI_API_KEY,
+    openaiEmbeddingModel: config.OPENAI_EMBEDDING_MODEL,
+  });
 
   const pipeline: ChatPipelineDeps =
     deps.pipeline ?? {
@@ -41,6 +54,13 @@ export function createApp(config: AppConfig, deps: AppDeps = {}): Express {
         openaiChatModel: config.OPENAI_CHAT_MODEL,
       }),
       template: getPromptTemplate(config.PROMPT_VERSION),
+      retrieveContext: (question, ownerId) =>
+        ownerId
+          ? retrieveChunks({ embeddings, chunks }, ownerId, question, {
+              topK: config.RAG_TOP_K,
+              minScore: config.RAG_MIN_SCORE,
+            })
+          : Promise.resolve([]),
     };
 
   const requireAuth = createAuthMiddleware(config.JWT_SECRET);
@@ -49,6 +69,11 @@ export function createApp(config: AppConfig, deps: AppDeps = {}): Express {
 
   app.use("/api/v1", apiLimiter);
   app.use("/api/v1/auth", createAuthRouter(users, config));
+  app.use(
+    "/api/v1/documents",
+    requireAuth,
+    createDocumentsRouter({ documents, chunks, embeddings, config }),
+  );
   app.use("/api/v1/chat", requireAuth, llmLimiter, createChatRouter({ conversations, messages, pipeline }));
 
   app.use(notFoundHandler);

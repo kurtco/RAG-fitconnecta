@@ -16,13 +16,37 @@ import { processModelOutput } from "./post-process.js";
 export interface ChatPipelineDeps {
   provider: LLMProvider;
   template: PromptTemplate;
-  /** Phase 2 injects pgvector retrieval here; Phase 1 returns no context. */
-  retrieveContext?: (question: string) => Promise<RetrievedChunk[]>;
+  /** Phase 2 injects pgvector retrieval here, scoped to the requesting user. */
+  retrieveContext?: (question: string, ownerId?: string) => Promise<RetrievedChunk[]>;
 }
 
 export interface ChatPipelineInput {
   question: string;
   history: ChatHistoryEntry[];
+  ownerId?: string;
+}
+
+/**
+ * When retrieval is wired but nothing scored above the threshold, we answer
+ * with a structured "not grounded" response WITHOUT calling the LLM:
+ * prevents hallucination (SPEC F7) and saves tokens (SPEC B9).
+ */
+function notGroundedOutput(deps: ChatPipelineDeps): ChatOutput {
+  return {
+    answer:
+      "The uploaded documents do not contain information to answer this question. Try rephrasing, or upload a document that covers the topic.",
+    confidence: 0.05,
+    citations: [],
+    ai: {
+      modelId: `none:${deps.provider.name}`,
+      promptVersion: deps.template.version,
+      retrievedChunkIds: [],
+      confidence: 0.05,
+      promptTokens: 0,
+      completionTokens: 0,
+      latencyMs: 0,
+    },
+  };
 }
 
 /** Non-streaming run: build-prompt -> invoke -> post-process. */
@@ -30,7 +54,13 @@ export async function runChat(
   input: ChatPipelineInput,
   deps: ChatPipelineDeps,
 ): Promise<ChatOutput> {
-  const context = deps.retrieveContext ? await deps.retrieveContext(input.question) : [];
+  let context: RetrievedChunk[] = [];
+  if (deps.retrieveContext) {
+    context = await deps.retrieveContext(input.question, input.ownerId);
+    if (context.length === 0) {
+      return notGroundedOutput(deps);
+    }
+  }
   const request = buildPrompt({ ...input, context }, deps.template);
   const result = await invoke(deps.provider, request);
   const processed = processModelOutput(result.content);
@@ -68,9 +98,16 @@ export async function* runChatStream(
 
   let context: RetrievedChunk[] = [];
   try {
-    context = deps.retrieveContext ? await deps.retrieveContext(input.question) : [];
+    context = deps.retrieveContext
+      ? await deps.retrieveContext(input.question, input.ownerId)
+      : [];
   } catch {
     context = [];
+  }
+
+  if (deps.retrieveContext && context.length === 0) {
+    yield { type: "done", output: notGroundedOutput(deps) };
+    return;
   }
 
   const request = buildPrompt({ ...input, context }, deps.template);

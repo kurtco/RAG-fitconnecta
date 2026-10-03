@@ -54,6 +54,28 @@ describe("runChat pipeline (SPEC B5)", () => {
     }
     expect(events.some((e) => e.type === "done")).toBe(true);
   });
+
+  it("short-circuits to a not-grounded answer without calling the LLM (SPEC F7)", async () => {
+    const forbiddenProvider = {
+      name: "forbidden",
+      complete: async () => {
+        throw new Error("LLM must not be called when retrieval is empty");
+      },
+      stream: async function* () {
+        throw new Error("LLM must not be called when retrieval is empty");
+      },
+    };
+    const emptyRetrieval: ChatPipelineDeps = {
+      provider: forbiddenProvider,
+      template: getPromptTemplate("v1"),
+      retrieveContext: async () => [],
+    };
+    const output = await runChat({ question: "q?", history: [] }, emptyRetrieval);
+    expect(output.confidence).toBeLessThan(0.3);
+    expect(output.citations).toEqual([]);
+    expect(output.answer).toMatch(/documents do not contain/i);
+    expect(output.ai.promptTokens).toBe(0);
+  });
 });
 
 describe("runChatStream pipeline (bonus X1)", () => {

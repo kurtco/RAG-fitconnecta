@@ -35,17 +35,17 @@
 - [x] Unit tests: pipeline stages, provider factory, prompt registry, post-process validation (mock provider)
 - [x] Commit per feature group (`feat: ...`)
 
-## Phase 2 — RAG (~1.5h) · Owner: Kimi
+## Phase 2 — RAG (~1.5h) · Owner: Kimi (executed by Qwen session)
 
-- [ ] `rag/parse.ts` — TXT + PDF text extraction (`pdf-parse`); reject unsupported/oversized files
-- [ ] `rag/chunk.ts` — paragraph-aware chunking ~500 tokens, 50-token overlap, chunk index + doc metadata
-- [ ] `rag/embed.ts` — `text-embedding-3-small` adapter behind `EmbeddingProvider` port (+ mock)
-- [ ] `rag/retrieve.ts` — pgvector cosine top-k, score threshold from config
-- [ ] `api/routes/documents.ts` — `POST /documents` (multipart upload → parse → chunk → embed → store), `GET /documents` (list + status)
-- [ ] Wire retrieval into chat pipeline: retrieved chunks → fenced untrusted context → citations in response
-- [ ] Low-confidence path: below threshold → structured "not grounded" answer (SPEC F7)
-- [ ] Integration test: ingest fixture doc → query → expect citation of correct chunk (mock embeddings)
-- [ ] Commit
+- [x] `rag/parse.ts` — TXT + PDF text extraction (`pdf-parse`); reject unsupported/oversized files
+- [x] `rag/chunk.ts` — paragraph-aware chunking ~500 tokens, 50-token overlap, chunk index + doc metadata
+- [x] `rag/embed.ts` — `text-embedding-3-small` adapter behind `EmbeddingProvider` port (+ mock)
+- [x] `rag/retrieve.ts` — pgvector cosine top-k, score threshold from config
+- [x] `api/routes/documents.ts` — `POST /documents` (multipart upload → parse → chunk → embed → store), `GET /documents` (list + status)
+- [x] Wire retrieval into chat pipeline: retrieved chunks → fenced untrusted context → citations in response
+- [x] Low-confidence path: below threshold → structured "not grounded" answer (SPEC F7)
+- [x] Integration test: ingest fixture doc → query → expect citation of correct chunk (mock embeddings)
+- [x] Commit
 
 ## Phase 3 — Frontend (~2h) · Owner: Kimi
 
