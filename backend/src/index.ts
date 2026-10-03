@@ -1,13 +1,18 @@
-import express from "express";
+import { loadConfig } from "./config.js";
+import { createApp } from "./app.js";
 
-const app = express();
-app.use(express.json());
+const config = loadConfig();
+const app = createApp(config);
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "finconecta-assessment-backend" });
+const server = app.listen(config.PORT, () => {
+  console.log(`backend listening on :${config.PORT} (provider=${config.LLM_PROVIDER}, prompt=${config.PROMPT_VERSION})`);
 });
 
-const port = Number(process.env.PORT ?? 3000);
-app.listen(port, () => {
-  console.log(`backend listening on :${port}`);
-});
+function shutdown(signal: string): void {
+  console.log(`${signal} received, shutting down`);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));

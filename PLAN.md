@@ -18,22 +18,22 @@
 - [x] git init + initial commit
 - [x] Verify: `docker compose up` → pgvector ready, schema applied
 
-## Phase 1 — Backend core (~2.5h) · Owner: Kimi
+## Phase 1 — Backend core (~2.5h) · Owner: Kimi (executed by Qwen session)
 
-- [ ] `backend/src/domain/`: types (`Document`, `Chunk`, `Conversation`, `Message`) + ports (`LLMProvider`, repositories). No external imports.
-- [ ] `ai/providers/llm-provider.ts` — interface: `complete(request): Promise<LLMResult>` incl. streaming variant + usage metadata
-- [ ] `ai/providers/openai.ts` — adapter for `gpt-4o-mini` (chat completions + SSE stream)
-- [ ] `ai/providers/mock.ts` — deterministic adapter (echo/fixture-based; enables full UX without API key)
-- [ ] `ai/providers/factory.ts` — selects provider via `LLM_PROVIDER` env
-- [ ] `ai/prompts/` — `qa.v1.ts`, `qa.v2.ts` templates + `registry.ts`; active version via `PROMPT_VERSION` env; defensive system prompt (injection mitigation per SPEC B8)
-- [ ] `ai/pipeline/` — `build-prompt.ts` → `invoke.ts` → `post-process.ts` (zod validation of structured output: answer, citations, confidence)
-- [ ] `config.ts` — single env source (zod-parsed, fail fast)
-- [ ] `middleware/`: `auth.ts` (JWT verify), `rate-limit.ts`, `error-handler.ts` (no stack leaks)
-- [ ] `api/routes/auth.ts` — `POST /register`, `POST /login` (bcrypt)
-- [ ] `infra/` — pg pool + repositories (users, documents, conversations, messages)
-- [ ] `api/routes/chat.ts` — `POST /api/v1/chat` (JSON)
-- [ ] Unit tests: pipeline stages, provider factory, prompt registry, post-process validation (mock provider)
-- [ ] Commit per feature group (`feat: ...`)
+- [x] `backend/src/domain/`: types (`Document`, `Chunk`, `Conversation`, `Message`) + ports (`LLMProvider`, repositories). No external imports.
+- [x] `ai/providers/llm-provider.ts` — interface: `complete(request): Promise<LLMResult>` incl. streaming variant + usage metadata
+- [x] `ai/providers/openai.ts` — adapter for `gpt-4o-mini` (chat completions + SSE stream)
+- [x] `ai/providers/mock.ts` — deterministic adapter (echo/fixture-based; enables full UX without API key)
+- [x] `ai/providers/factory.ts` — selects provider via `LLM_PROVIDER` env
+- [x] `ai/prompts/` — `qa.v1.ts`, `qa.v2.ts` templates + `registry.ts`; active version via `PROMPT_VERSION` env; defensive system prompt (injection mitigation per SPEC B8)
+- [x] `ai/pipeline/` — `build-prompt.ts` → `invoke.ts` → `post-process.ts` (zod validation of structured output: answer, citations, confidence)
+- [x] `config.ts` — single env source (zod-parsed, fail fast)
+- [x] `middleware/`: `auth.ts` (JWT verify), `rate-limit.ts`, `error-handler.ts` (no stack leaks)
+- [x] `api/routes/auth.ts` — `POST /register`, `POST /login` (bcrypt)
+- [x] `infra/` — pg pool + repositories (users, documents, conversations, messages)
+- [x] `api/routes/chat.ts` — `POST /api/v1/chat` (JSON)
+- [x] Unit tests: pipeline stages, provider factory, prompt registry, post-process validation (mock provider)
+- [x] Commit per feature group (`feat: ...`)
 
 ## Phase 2 — RAG (~1.5h) · Owner: Kimi
 
