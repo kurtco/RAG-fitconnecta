@@ -26,6 +26,9 @@ export interface AppDeps {
 /** App factory: dependencies injected, testable without network (AGENTS.md #3). */
 export function createApp(config: AppConfig, deps: AppDeps = {}): Express {
   const app = express();
+  // Behind nginx (compose) / ALB (production): trust the first proxy hop so
+  // req.ip is the real client and rate limiting keys per user, per proxy.
+  app.set("trust proxy", 1);
   app.use(cors({ origin: config.FRONTEND_URL }));
   app.use(express.json({ limit: "1mb" }));
 

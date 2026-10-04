@@ -33,29 +33,46 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
 }
 
 /**
- * Deterministic hash-based embeddings for tests and no-key demos.
- * Identical text -> identical unit vector (cosine 1); different texts get
- * near-orthogonal vectors (cosine ~0), which is enough to exercise the
- * retrieval path end to end.
+ * Deterministic lexical embeddings for tests and no-key demos.
+ * Feature hashing: each (stopword-filtered) token is hashed into a dimension;
+ * texts sharing vocabulary get proportional cosine similarity, unrelated
+ * texts stay near 0, identical texts give exactly 1. Not semantic — it
+ * exercises the retrieval plumbing, nothing more.
  */
 export class MockEmbeddingProvider implements EmbeddingProvider {
   readonly name = "mock";
   constructor(readonly dimensions: number = 1536) {}
 
   async embed(texts: string[]): Promise<number[][]> {
-    return texts.map((text) => seededUnitVector(text, this.dimensions));
+    return texts.map((text) => lexicalUnitVector(text, this.dimensions));
   }
 }
 
-function seededUnitVector(text: string, dimensions: number): number[] {
-  const normalized = text.trim().toLowerCase().replace(/\s+/g, " ");
-  const seed = createHash("sha256").update(normalized).digest();
-  let state = seed.readUInt32BE(0);
-  const next = (): number => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0xffffffff;
-  };
-  const vector = Array.from({ length: dimensions }, () => next() * 2 - 1);
+const STOPWORDS = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "by", "did", "do", "does", "for", "from",
+  "had", "has", "have", "how", "in", "is", "it", "its", "much", "many", "of", "on",
+  "or", "that", "the", "to", "was", "were", "what", "when", "which", "who", "why",
+  "with", "you", "your", "question", "answer",
+]);
+
+function lexicalUnitVector(text: string, dimensions: number): number[] {
+  const vector = new Array<number>(dimensions).fill(0);
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t))
+    // Naive 5-char stem: matches morphological variants (client/clients,
+    // onboarded/onboarding, exceed/exceeding). Deterministic, test-only.
+    .map((t) => t.slice(0, 5));
+
+  for (const token of tokens) {
+    const hash = createHash("sha256").update(token).digest();
+    const index = hash.readUInt32BE(0) % dimensions;
+    const sign = (hash[4]! & 1) === 0 ? 1 : -1;
+    vector[index] = (vector[index] ?? 0) + sign;
+  }
+
   const norm = Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0)) || 1;
   return vector.map((x) => x / norm);
 }

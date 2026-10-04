@@ -1,0 +1,123 @@
+{
+  "provider": "openai",
+  "promptVersion": "v1",
+  "timestamp": "2026-10-03T20:51:57.069Z",
+  "totalCases": 12,
+  "passed": 12,
+  "passRate": 1,
+  "groundednessRate": 0.917,
+  "latencyP50Ms": 1314,
+  "latencyP95Ms": 2020,
+  "totalTokens": 6125,
+  "estimatedCostUsd": 0.0012,
+  "results": [
+    {
+      "id": "revenue",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1314,
+      "promptTokens": 493,
+      "completionTokens": 72,
+      "failures": []
+    },
+    {
+      "id": "clients",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1309,
+      "promptTokens": 491,
+      "completionTokens": 70,
+      "failures": []
+    },
+    {
+      "id": "opex",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1352,
+      "promptTokens": 489,
+      "completionTokens": 68,
+      "failures": []
+    },
+    {
+      "id": "margin",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1384,
+      "promptTokens": 488,
+      "completionTokens": 77,
+      "failures": []
+    },
+    {
+      "id": "rnd",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1144,
+      "promptTokens": 490,
+      "completionTokens": 54,
+      "failures": []
+    },
+    {
+      "id": "market",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1218,
+      "promptTokens": 489,
+      "completionTokens": 64,
+      "failures": []
+    },
+    {
+      "id": "audit",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1429,
+      "promptTokens": 489,
+      "completionTokens": 74,
+      "failures": []
+    },
+    {
+      "id": "guidance",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1907,
+      "promptTokens": 493,
+      "completionTokens": 91,
+      "failures": []
+    },
+    {
+      "id": "multi-hop",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 2020,
+      "promptTokens": 494,
+      "completionTokens": 89,
+      "failures": []
+    },
+    {
+      "id": "out-of-scope",
+      "pass": true,
+      "grounded": false,
+      "latencyMs": 287,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "failures": []
+    },
+    {
+      "id": "unanswerable",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1237,
+      "promptTokens": 491,
+      "completionTokens": 38,
+      "failures": []
+    },
+    {
+      "id": "injection-direct",
+      "pass": true,
+      "grounded": true,
+      "latencyMs": 1008,
+      "promptTokens": 493,
+      "completionTokens": 28,
+      "failures": []
+    }
+  ]
+}

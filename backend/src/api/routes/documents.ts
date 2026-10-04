@@ -26,66 +26,90 @@ export function createDocumentsRouter(deps: DocumentsRouterDeps): Router {
   });
 
   /** POST /api/v1/documents — multipart upload, synchronous ingestion (SPEC/README trade-off). */
-  router.post("/", upload.single("file"), async (req: AuthenticatedRequest, res, next) => {
-    try {
-      const userId = requireUser(req);
-      const file = req.file;
-      if (!file) {
-        throw new ApiError(400, "file_required", "Multipart field 'file' is required");
-      }
-
-      assertSupportedFile(file.mimetype, file.originalname, file.size, {
-        maxBytes: deps.config.MAX_UPLOAD_MB * 1024 * 1024,
-      });
-
-      const sha256 = createHash("sha256").update(file.buffer).digest("hex");
-      const document = await deps.documents.create({
-        ownerId: userId,
-        filename: file.originalname.slice(0, 255),
-        mimeType: file.mimetype,
-        sizeBytes: file.size,
-        sha256,
-      });
-
+  router.post(
+    "/",
+    upload.single("file"),
+    async (req: AuthenticatedRequest, res, next) => {
       try {
-        await deps.documents.markProcessing(document.id);
-        const parsed = await parseDocument(file.buffer, file.mimetype);
-        const chunks = chunkText(parsed.text, {
-          chunkTokens: deps.config.RAG_CHUNK_TOKENS,
-          overlapTokens: deps.config.RAG_CHUNK_OVERLAP,
-        });
-        if (chunks.length === 0) {
-          throw new Error("Document produced no chunks");
+        const userId = requireUser(req);
+        const file = req.file;
+        if (!file) {
+          throw new ApiError(
+            400,
+            "file_required",
+            "Multipart field 'file' is required",
+          );
         }
-        const vectors = await deps.embeddings.embed(chunks.map((c) => c.content));
-        await deps.chunks.insertMany(
-          chunks.map((chunk, i) => ({
-            documentId: document.id,
-            chunkIndex: chunk.chunkIndex,
-            content: chunk.content,
-            tokenEst: chunk.tokenEst,
-            embedding: vectors[i] ?? [],
-          })),
-        );
-        await deps.documents.markReady(document.id, {
-          charCount: parsed.charCount,
-          chunkCount: chunks.length,
+
+        assertSupportedFile(file.mimetype, file.originalname, file.size, {
+          maxBytes: deps.config.MAX_UPLOAD_MB * 1024 * 1024,
         });
-        res.status(201).json({
-          document: publicView({ ...document, status: "ready", chunkCount: chunks.length, charCount: parsed.charCount }),
+
+        const sha256 = createHash("sha256").update(file.buffer).digest("hex");
+        const document = await deps.documents.create({
+          ownerId: userId,
+          filename: file.originalname.slice(0, 255),
+          mimeType: file.mimetype,
+          sizeBytes: file.size,
+          sha256,
         });
+
+        try {
+          await deps.documents.markProcessing(document.id);
+          const parsed = await parseDocument(file.buffer, file.mimetype);
+          const chunks = chunkText(parsed.text, {
+            chunkTokens: deps.config.RAG_CHUNK_TOKENS,
+            overlapTokens: deps.config.RAG_CHUNK_OVERLAP,
+          });
+          if (chunks.length === 0) {
+            throw new Error("Document produced no chunks");
+          }
+          /* Important: Embedding here (pg vector)
+           */
+          const vectors = await deps.embeddings.embed(
+            // It iterates over the chunks, making an HTTP request for each one.
+            // This would create a network bottleneck, cause latency to spike, and immediately hit the API rate limits.
+            chunks.map((c) => c.content),
+          );
+          await deps.chunks.insertMany(
+            chunks.map((chunk, i) => ({
+              documentId: document.id,
+              chunkIndex: chunk.chunkIndex,
+              content: chunk.content,
+              tokenEst: chunk.tokenEst,
+              embedding: vectors[i] ?? [],
+            })),
+          );
+          await deps.documents.markReady(document.id, {
+            charCount: parsed.charCount,
+            chunkCount: chunks.length,
+          });
+          res.status(201).json({
+            document: publicView({
+              ...document,
+              status: "ready",
+              chunkCount: chunks.length,
+              charCount: parsed.charCount,
+            }),
+          });
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Processing failed";
+          await deps.documents.markFailed(document.id, message);
+          res.status(422).json({
+            error: { code: "processing_failed", message },
+            document: publicView({
+              ...document,
+              status: "failed",
+              errorDetail: message,
+            }),
+          });
+        }
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Processing failed";
-        await deps.documents.markFailed(document.id, message);
-        res.status(422).json({
-          error: { code: "processing_failed", message },
-          document: publicView({ ...document, status: "failed", errorDetail: message }),
-        });
+        next(error);
       }
-    } catch (error) {
-      next(error);
-    }
-  });
+    },
+  );
 
   /** GET /api/v1/documents — owner-scoped list with ingestion status. */
   router.get("/", async (req: AuthenticatedRequest, res, next) => {

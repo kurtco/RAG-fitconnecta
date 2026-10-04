@@ -15,7 +15,7 @@ const envSchema = z
     OPENAI_EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
     PROMPT_VERSION: z.string().default("v1"),
     RAG_TOP_K: z.coerce.number().int().positive().default(5),
-    RAG_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.35),
+    RAG_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.2),
     RAG_CHUNK_TOKENS: z.coerce.number().int().positive().default(500),
     RAG_CHUNK_OVERLAP: z.coerce.number().int().nonnegative().default(50),
     RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),

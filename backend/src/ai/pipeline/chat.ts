@@ -17,7 +17,10 @@ export interface ChatPipelineDeps {
   provider: LLMProvider;
   template: PromptTemplate;
   /** Phase 2 injects pgvector retrieval here, scoped to the requesting user. */
-  retrieveContext?: (question: string, ownerId?: string) => Promise<RetrievedChunk[]>;
+  retrieveContext?: (
+    question: string,
+    ownerId?: string,
+  ) => Promise<RetrievedChunk[]>;
 }
 
 export interface ChatPipelineInput {
@@ -94,6 +97,7 @@ export async function* runChatStream(
   input: ChatPipelineInput,
   deps: ChatPipelineDeps,
 ): AsyncGenerator<ChatStreamEvent> {
+  /**Before touching the database or making network requests, I immediately emit a state event. */
   yield { type: "status", status: "thinking" };
 
   let context: RetrievedChunk[] = [];
@@ -105,6 +109,8 @@ export async function* runChatStream(
     context = [];
   }
 
+  /*If the vector search fails to find relevant context, the function returns early.
+   It sends the pre-built deterministic message directly to the frontend and terminates the connection. */
   if (deps.retrieveContext && context.length === 0) {
     yield { type: "done", output: notGroundedOutput(deps) };
     return;
@@ -117,6 +123,9 @@ export async function* runChatStream(
   let usage = { promptTokens: 0, completionTokens: 0 };
   let failed = false;
 
+  /*IMPORTANT
+     Stream proxy: yield tokens immediately for real-time (WHATs is happening with the AI ) UX while buffering the full text for final Zod validation.
+  */
   for await (const event of deps.provider.stream(request)) {
     if (event.type === "delta") {
       finalContent += event.text;

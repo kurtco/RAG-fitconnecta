@@ -37,8 +37,12 @@ export default function ChatPage() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    return () => abortRef.current?.abort()
   }, [messages])
+
+  // Abort in-flight stream only on unmount (NOT on every messages change).
+  useEffect(() => {
+    return () => abortRef.current?.abort()
+  }, [])
 
   async function ask(question: string) {
     const trimmed = question.trim()

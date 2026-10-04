@@ -1,0 +1,12 @@
+{
+  "provider": "openai",
+  "promptVersion": "v1",
+  "totalCases": 12,
+  "passed": 12,
+  "passRate": 1,
+  "groundednessRate": 0.917,
+  "latencyP50Ms": 1314,
+  "latencyP95Ms": 2020,
+  "totalTokens": 6125,
+  "estimatedCostUsd": 0.0012
+}

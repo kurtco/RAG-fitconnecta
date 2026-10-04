@@ -1,7 +1,7 @@
 # PLAN — Execution Phases
 
 > Deadline: **Wednesday, Oct 7**. Budget: ~9–10h.
-> Coding phases are executed by sessions using `opencode-go/kimi-k2.7-code`; planning/docs/review by `opencode-go/qwen3.8-max`.
+> Coding phases are executed by sessions using `opencode-go/-k2.7-code`; planning/docs/review by `opencode-go/qwen3.8-max`.
 > **Rules for agents:** read `AGENTS.md` first; after finishing a task, check its box here and commit.
 
 ## Phase 0 — Setup & planning artifacts ✅
@@ -18,7 +18,7 @@
 - [x] git init + initial commit
 - [x] Verify: `docker compose up` → pgvector ready, schema applied
 
-## Phase 1 — Backend core (~2.5h) · Owner: Kimi (executed by Qwen session)
+## Phase 1 — Backend core (~2.5h) · Owner: (executed by Qwen session)
 
 - [x] `backend/src/domain/`: types (`Document`, `Chunk`, `Conversation`, `Message`) + ports (`LLMProvider`, repositories). No external imports.
 - [x] `ai/providers/llm-provider.ts` — interface: `complete(request): Promise<LLMResult>` incl. streaming variant + usage metadata
@@ -35,7 +35,7 @@
 - [x] Unit tests: pipeline stages, provider factory, prompt registry, post-process validation (mock provider)
 - [x] Commit per feature group (`feat: ...`)
 
-## Phase 2 — RAG (~1.5h) · Owner: Kimi (executed by Qwen session)
+## Phase 2 — RAG (~1.5h) · Owner: (executed by Qwen session)
 
 - [x] `rag/parse.ts` — TXT + PDF text extraction (`pdf-parse`); reject unsupported/oversized files
 - [x] `rag/chunk.ts` — paragraph-aware chunking ~500 tokens, 50-token overlap, chunk index + doc metadata
@@ -47,7 +47,7 @@
 - [x] Integration test: ingest fixture doc → query → expect citation of correct chunk (mock embeddings)
 - [x] Commit
 
-## Phase 3 — Frontend (~2h) · Owner: Kimi (executed by Qwen session)
+## Phase 3 — Frontend (~2h) · Owner: (executed by Qwen session)
 
 - [x] Router + 2 pages: `/` (Upload & Documents), `/chat` (Assistant)
 - [x] Auth: simple login/register form, JWT in memory + refresh-safe storage, protected routes
@@ -59,7 +59,7 @@
 - [x] Loading/error/empty states everywhere (SPEC F4)
 - [x] Commit
 
-## Phase 4 — Infra (~1h) · Owner: Kimi (executed by Qwen session)
+## Phase 4 — Infra (~1h) · Owner: (executed by Qwen session)
 
 - [x] `backend/Dockerfile` (multi-stage, non-root user) + `frontend/Dockerfile`
 - [x] `docker-compose.yml` — add backend + frontend services, healthchecks, depends_on

@@ -101,6 +101,20 @@ describe("rag/embed (mock provider)", () => {
     expect(dot).toBeLessThan(0.1);
   });
 
+  it("texts sharing vocabulary have proportional similarity (lexical mock)", async () => {
+    const provider = new MockEmbeddingProvider();
+    const [a, b, c] = await provider.embed([
+      "total revenue in Q3 2026",
+      "total revenue for Q3 2026 increased",
+      "banana smoothie recipe",
+    ]);
+    const overlap = a!.reduce((s, x, i) => s + x * b![i]!, 0);
+    const unrelated = a!.reduce((s, x, i) => s + x * c![i]!, 0);
+    expect(overlap).toBeGreaterThan(0.5);
+    expect(unrelated).toBeLessThan(0.15);
+    expect(overlap).toBeGreaterThan(unrelated);
+  });
+
   it("handles empty input", async () => {
     expect(await new MockEmbeddingProvider().embed([])).toEqual([]);
   });
