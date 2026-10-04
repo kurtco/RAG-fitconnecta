@@ -69,14 +69,14 @@
 
 ## Phase 5 — README + evals (~1h) · Owner: Qwen
 
-- [ ] `evals/golden.json` — 10–15 Q&A pairs over fixture docs (expected chunk/answer traits)
-- [ ] `evals/run.ts` — runs golden set against pipeline (mock or real), reports groundedness/latency/token cost, exit non-zero on regression vs baseline
-- [ ] `README.md` — sections: Run locally · Architecture decisions · AI design choices (provider abstraction, prompt versioning, injection defense) · Data (PII, retention, logging, auditability) · Evaluation & reliability · Costs (1k/10k/100k table) · Infrastructure (keys, rotation, bursty scaling) · Trade-offs & known limitations · Production roadmap (queues, tool calling, multi-tenant, OIDC)
-- [ ] Commit
+- [x] `evals/golden.json` — 10–15 Q&A pairs over fixture docs (expected chunk/answer traits)
+- [x] `evals/run.ts` — runs golden set against pipeline (mock or real), reports groundedness/latency/token cost, exit non-zero on regression vs baseline
+- [x] `README.md` — sections: Run locally · Architecture decisions · AI design choices (provider abstraction, prompt versioning, injection defense) · Data (PII, retention, logging, auditability) · Evaluation & reliability · Costs (1k/10k/100k table) · Infrastructure (keys, rotation, bursty scaling) · Trade-offs & known limitations · Production roadmap (queues, tool calling, multi-tenant, OIDC)
+- [x] Commit
 
 ## Phase 6 — Buffer / polish (Tue Oct 6) · Owner: both
 
-- [ ] End-to-end pass with `docker compose up`: SPEC §5 acceptance criteria 1–8
-- [ ] `npm run build` + `npm test` green in both packages
-- [ ] Repo hygiene: no dead files, `.env` never committed (`git log` check), commit history clean
-- [ ] Push to GitHub, make repo presentable (description, topics)
+- [x] End-to-end pass with `docker compose up`: SPEC §5 acceptance criteria 1–8
+- [x] `npm run build` + `npm test` green in both packages
+- [x] Repo hygiene: no dead files, `.env` never committed (`git log` check), commit history clean
+- [x] Push to GitHub, make repo presentable (description, topics)
